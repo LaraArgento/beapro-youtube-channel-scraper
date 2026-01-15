@@ -1,0 +1,9 @@
+botcity_framework_core
+botcity-csv-plugin
+botcity_framework_base
+botcity_excel_plugin
+botcity_framework_web
+botcity_maestro_sdk
+python-dotenv
+botcity-framework-web
+webdriver-manager
