@@ -1,0 +1,21 @@
+# Environment Variables
+
+# Change file name to '.env' to enable local bot execution.
+
+# BotCity Orchestrator Credentials
+
+# This file contains sensitive information required for local bot execution. 
+# It is only needed for local development/testing and should never be committed to version control.
+
+# When the bot is deployed to the BotCity Orchestrator, the runner will automatically
+# use the appropriate credentials from the environment, without the need for the '.env' file.
+
+# For instructions on obtaining credentials for local testing, visit:
+# https://documentation.botcity.dev/maestro/features/dev-environment/
+
+
+# Required for authenticated local execution:
+SERVER = 'https://developers.botcity.dev/'
+LOGIN = ''
+KEY = '' 
+TASK_ID = ''

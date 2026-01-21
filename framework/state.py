@@ -13,13 +13,15 @@ logger = logging.getLogger(__name__)
 state.py
     Implements a state management system that works seamlessly with BotCity Orchestrator features.
     The State class maintains the execution state of automation tasks, providing features such as:
-        - Count successfull and failed items
+        - Count successful and failed items
         - Check for interruption request
         - Stores WebBot(), DesktopBot() instances
         - And more
+    Authenticates the bot to connect with BotCity Orchestrator based on the environment:
+        - BotCity Runner: Automatic authentication via system arguments.
+        - Local with Orchestrator: Credentials from the .env file.
+        - Local Test Mode: No authentication, uses mock objects.
 '''
-
-# aaaaaaaaaaaaaaaaaaa
 
 
 @dataclass

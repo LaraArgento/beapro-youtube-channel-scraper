@@ -1,4 +1,4 @@
-# BeaPro Automation Framework
+# BeaPro Framework
 
 The BeaPro (BotCity Enterprise Automation Process) is a robust, production-ready automation framework built on top of BotCity that provides state management, structured error handling, and seamless integration with BotCity Orchestrator.
 

@@ -27,7 +27,7 @@ def handle_business_exception(exception: Exception):
         title="Business Exception ocurred.",
         message=f"Exception: {exception}, Item: {
             STATE.item}.",
-        alert_type=AlertType.ERROR)
+        alert_type=AlertType.WARN)
     screenshot_error_report(exception)
     # You can add more steps here if needed!
     # What should be done when a business exception occurs?
@@ -86,7 +86,7 @@ def register_success(message):
     """
     Logs a successful item processing and records it in State and Datasource.
     """
-    logger.info(f"Item processing successfull: item: {STATE.item}, {message}")
+    logger.info(f"Item processing successful: item: {STATE.item}, {message}")
     STATE.register_success()
     data_source.report_success(message)
 
