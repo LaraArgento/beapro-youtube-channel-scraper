@@ -76,16 +76,22 @@ def upload_output_orchestrator():
         logger.info(
             f"Uploading output to BotCity Orchestrator as Result Files...")
         for f in glob.iglob("./output/*"):
-            fp = Path(f)
-            STATE.maestro.post_artifact(
-                task_id=STATE.task_id,
-                artifact_name=fp.name,
-                filepath=fp
-            )
+            try:
+                fp = Path(f)
+                STATE.maestro.post_artifact(
+                    task_id=STATE.task_id,
+                    artifact_name=fp.name,
+                    filepath=fp
+                )
+                logger.info(f"Successfully uploaded artifact: {fp.name}")
 
-    except Exception as ex:
-        print(f"Error uploading output to BotCity Orchestrator: {ex}")
-        raise ex
+            except Exception as ex:
+                logger.error(f"Error uploading output to BotCity Orchestrator: {ex}")
+                STATE.maestro.alert(
+                    task_id=STATE.task_id,
+                    title="Error uploading output to BotCity Orchestrator",
+                    message=f"Error uploading output to BotCity Orchestrator: {ex}.",
+                    alert_type=AlertType.ERROR)
 
 
 def finish_task_orchestrator():
@@ -104,7 +110,7 @@ def finish_task_orchestrator():
         )
 
     except Exception as ex:
-        print(f"Error finishing task in the BotCity Orchestrator: {ex}")
+        logger.error(f"Error finishing task in the BotCity Orchestrator: {ex}")
         raise ex
 
 
@@ -127,7 +133,6 @@ def finish_status_message() -> str:
     except Exception as ex:
         logger.error(f"Error generating finish status message: {ex}")
         return "Task completed. Check the Result Files for more details."
-    # todo test error here
 
 
 def append_finish_status_message(extra: str) -> None:
