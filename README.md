@@ -1,6 +1,44 @@
-# BeaPro Framework
+# YouTube Channel Scraper: a BotCity Datapool Showcase
 
-The BeaPro (BotCity Enterprise Automation Process) is a robust, production-ready automation framework built on top of BotCity that provides state management, structured error handling, and seamless integration with BotCity Orchestrator.
+This is a simple bot that shows how to use **BotCity Datapools** to feed work items to an automation. It's a demo, not a production scraper. The YouTube part is kept small on purpose, so the focus stays on how the Datapool delivers items, tracks their status and handles retries.
+
+## 🎬 What the bot does
+
+For each item it takes from the `YoutubeChannels` Datapool, the bot:
+
+1. Reads the `channel` field, for example `botcity_br`
+2. Opens `https://www.youtube.com/@<channel>` in the browser
+3. Reads the channel name, subscriber count and video count from the page header
+4. Reports the result back to the Datapool
+
+These cases are built in so you can see how the Datapool handles each outcome:
+
+| Outcome | When it happens | What the Datapool shows |
+|---|---|---|
+| ✅ Success | The channel exists and its data was read | Item marked as **DONE** |
+| ⚠️ Business error | The channel doesn't exist (the page returns "404 Not Found") | Item marked as **ERROR** |
+| 💥 System error | A **simulated random failure** on about 1 in 10 items | Item marked as **ERROR**; the bot restarts and moves on to the next item |
+
+The random system error is intentional. It lets you see error handling, restarts and Datapool status tracking without having to break anything.
+
+## 🗂️ Setting up the Datapool
+
+1. In BotCity Orchestrator, create a Datapool with the label **`YoutubeChannels`**
+2. Add a field named **`channel`**
+3. Load items using one of the sample files in [resources/](resources/):
+   - [youtube-channels-15.csv](resources/youtube-channels-15.csv): a small set for a quick run
+   - [youtube-channels-170.csv](resources/youtube-channels-170.csv): a larger set that makes status tracking and the simulated errors easier to see
+   
+   The sample files include a few channel names that don't exist, such as `aaaa_ThisChannelDoesNotExist`, so that some items raise a business error.
+4. Deploy the bot and run a task. While it runs, watch the items move through the Datapool.
+
+The data source is set at the bottom of [framework/datasources.py](framework/datasources.py). To run the bot without a Datapool, switch to the `CSVSource` line and point it at one of the CSV files in `resources/`.
+
+---
+
+## About the framework
+
+This bot is built on **BeaPro** (BotCity Enterprise Automation Process), a production-ready automation framework built on top of BotCity. BeaPro provides state management and structured error handling, and it integrates with BotCity Orchestrator. The rest of this README documents the framework.
 
 ## 🚀 Features
 
@@ -27,6 +65,7 @@ BeaPro/
 │   ├── finalize.py            # Cleanup and finalization
 │   ├── status_handling.py     # Exception and success handlers
 │   └── logger.py              # Logging configuration
+├── resources/                  # Sample YouTube channel lists to load into the Datapool
 ├── requirements.txt            # Python dependencies
 ├── .env                        # Environment variables for testing (credentials)
 ├── .gitignore                  # Git ignore file
