@@ -26,6 +26,10 @@ class BaseSource():
 class DatapoolSource(BaseSource):
     def __init__(self, label: str):
         self.dp = STATE.maestro.get_datapool(label)
+        if self.dp is None:
+            raise RuntimeError(
+                f"Could not load Datapool '{label}'. The bot is not connected to the Orchestrator "
+                "(test mode). Set SERVER, LOGIN, KEY and TASK_ID in the .env file, or use CSVSource.")
         self.current_item = None
 
     def __str__(self):
@@ -127,6 +131,6 @@ class CSVSource(BaseSource):
 Setting Datasource: Datapool | CSV
 """
 
-# data_source = DatapoolSource("BeaPro-YoutubeChannels")
-data_source = CSVSource(r"./resources/input-channels-4.csv")
+data_source = DatapoolSource("YoutubeChannels")
+#data_source = CSVSource(r"./resources/input-channels-4.csv")
 logger.info(f"Datasource set to {data_source}.")

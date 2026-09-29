@@ -1,4 +1,5 @@
 import logging
+import random
 from .datasources import *  # test
 from .exceptions import BusinessException, InterruptException, SystemException
 from .state import STATE
@@ -29,15 +30,18 @@ def process_item(item):
     bot.browse(f"https://www.youtube.com/@{channel}")
 
     bot.wait(500)
-    
+
     # Find the <title> element and check its text    
     title_element = bot.page_title()
     if title_element == "404 Not Found":
         raise BusinessException(f"The YouTube channel '{channel}' was not found.")
+
+    # Simulates a random system failure
+    if random.randint(1, 10) == 1:
+        raise SystemException(f"Simulated random system error while processing channel '{channel}'.")
     
-    element = bot.find_element(
-        selector='//yt-content-metadata-view-model[@class="yt-page-header-view-model__page-header-content-metadata yt-content-metadata-view-model yt-content-metadata-view-model--inline yt-content-metadata-view-model--medium-text"]',
-        by=By.XPATH)
+        
+    element = bot.find_element(selector='//yt-content-metadata-view-model[@class="ytPageHeaderViewModelContentMetadata ytContentMetadataViewModelHost ytContentMetadataViewModelInline ytContentMetadataViewModelMediumText"]', by=By.XPATH)
 
     lines = [line for line in element.text.strip().split('\n')
              if line.strip() != '•']

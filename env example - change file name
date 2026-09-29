@@ -1,6 +1,12 @@
 # Environment Variables
 
-# Change file name to '.env' to enable local bot execution.
+###############################################################################
+####
+#### Change file name to '.env' to enable authenticated local bot execution.
+####
+###############################################################################
+
+
 
 # BotCity Orchestrator Credentials
 
