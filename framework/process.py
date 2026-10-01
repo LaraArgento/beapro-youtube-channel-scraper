@@ -37,7 +37,7 @@ def process_item(item):
         raise BusinessException(f"The YouTube channel '{channel}' was not found.")
 
     # Simulates a random system failure
-    if random.randint(1, 10) == 1:
+    if random.randint(1, 20) == 1:
         raise SystemException(f"Simulated random system error while processing channel '{channel}'.")
     
         

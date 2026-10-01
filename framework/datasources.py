@@ -131,6 +131,6 @@ class CSVSource(BaseSource):
 Setting Datasource: Datapool | CSV
 """
 
-data_source = DatapoolSource("YoutubeChannels")
-#data_source = CSVSource(r"./resources/input-channels-4.csv")
+#data_source = DatapoolSource("YoutubeChannels")
+data_source = CSVSource(r"./resources/youtube-channels-15.csv")
 logger.info(f"Datasource set to {data_source}.")
