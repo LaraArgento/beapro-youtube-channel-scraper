@@ -1,38 +1,33 @@
-# YouTube Channel Scraper: a BotCity Datapool Showcase
+# YouTube Channel Scraper: a BotCity CSV Showcase
 
-This is a simple bot that shows how to use **BotCity Datapools** to feed work items to an automation. It's a demo, not a production scraper. The YouTube part is kept small on purpose, so the focus stays on how the Datapool delivers items, tracks their status and handles retries.
+This is a simple bot that reads a list of YouTube channels from a CSV file and writes the result of each one to a new CSV file. It's a demo, not a production scraper. The YouTube part is kept small on purpose, so the focus stays on how the bot reads items from a CSV, handles errors and records the status of each item.
 
 ## 🎬 What the bot does
 
-For each item it takes from the `YoutubeChannels` Datapool, the bot:
+For each row in the input CSV, the bot:
 
-1. Reads the `channel` field, for example `botcity_br`
+1. Reads the `channel` column, for example `botcity_br`
 2. Opens `https://www.youtube.com/@<channel>` in the browser
 3. Reads the channel name, subscriber count and video count from the page header
-4. Reports the result back to the Datapool
+4. Writes the row to the result CSV with its status and message
 
-These cases are built in so you can see how the Datapool handles each outcome:
+These cases are built in so you can see how the bot handles each outcome:
 
-| Outcome | When it happens | What the Datapool shows |
+| Outcome | When it happens | `STATUS` in the result CSV |
 |---|---|---|
-| ✅ Success | The channel exists and its data was read | Item marked as **DONE** |
-| ⚠️ Business error | The channel doesn't exist (the page returns "404 Not Found") | Item marked as **ERROR** |
-| 💥 System error | A **simulated random failure** on about 1 in 10 items | Item marked as **ERROR**; the bot restarts and moves on to the next item |
+| ✅ Success | The channel exists and its data was read | `SUCCESS` |
+| ⚠️ Business error | The channel doesn't exist (the page returns "404 Not Found") | `BUSINESS EXCEPTION` |
+| 💥 System error | A **simulated random failure** on about 1 in 20 items | `SYSTEM EXCEPTION`; the bot restarts and moves on to the next row |
 
-The random system error is intentional. It lets you see error handling, restarts and Datapool status tracking without having to break anything.
+The random system error is intentional. It lets you see error handling, restarts and status tracking without having to break anything.
 
-## 🗂️ Setting up the Datapool
+## 🗂️ Input and output
 
-1. In BotCity Orchestrator, create a Datapool with the label **`YoutubeChannels`**
-2. Add a field named **`channel`**
-3. Load items using one of the sample files in [resources/](resources/):
-   - [youtube-channels-15.csv](resources/youtube-channels-15.csv): a small set for a quick run
-   - [youtube-channels-170.csv](resources/youtube-channels-170.csv): a larger set that makes status tracking and the simulated errors easier to see
-   
-   The sample files include a few channel names that don't exist, such as `aaaa_ThisChannelDoesNotExist`, so that some items raise a business error.
-4. Deploy the bot and run a task. While it runs, watch the items move through the Datapool.
+**Input:** the bot reads [resources/youtube-channels-15.csv](resources/youtube-channels-15.csv), a small set of 13 channels for a quick run. The file has one column, `channel`. It includes a channel name that doesn't exist, `aaaa_ThisChannelDoesNotExist`, so that at least one row raises a business error.
 
-The data source is set at the bottom of [framework/datasources.py](framework/datasources.py). To run the bot without a Datapool, switch to the `CSVSource` line and point it at one of the CSV files in `resources/`.
+To use the larger set, [youtube-channels-170.csv](resources/youtube-channels-170.csv), or your own file, change the path in the `CSVSource(...)` line at the bottom of [framework/datasources.py](framework/datasources.py). Any CSV with a `channel` column works.
+
+**Output:** the bot writes `output/CSV_BotCity_task-{task_id}_date-{timestamp}.csv`. It has the original columns plus `TIMESTAMP`, `STATUS` and `MESSAGE`. For a success, `MESSAGE` holds the channel name, subscriber count and video count. For an error, it holds the error message. When the bot runs connected to BotCity Orchestrator, the file is uploaded as a Result File at the end of the task.
 
 ---
 
@@ -45,7 +40,7 @@ This bot is built on **BeaPro** (BotCity Enterprise Automation Process), a produ
 - **State Management**: Built-in state tracking for success/error counts and execution status
 - **Structured Exception Handling**: Automatic handling of business exceptions, system exceptions, and interruption requests
 - **Default Logging**: File-based and BotCity Orchestrator logging with timestamps
-- **Multiple Data Sources**: Support for CSV files and BotCity Datapools
+- **CSV Data Source**: Reads items from a CSV file and writes a result CSV with the status of each item
 - **Error Reporting**: Screenshot capture and error reporting to BotCity Orchestrator
 - **Graceful Finalization**: Automatic cleanup, result file uploads, and task completion
 - **Restart Capability**: System exception recovery with automatic restart
@@ -59,13 +54,13 @@ BeaPro/
 ├── framework/                  # Core framework modules
 │   ├── state.py               # State management and BotCity SDK setup
 │   ├── exceptions.py          # Custom exception classes
-│   ├── datasources.py         # Data source implementations (CSV, Datapool)
+│   ├── datasources.py         # Data source implementations (CSV)
 │   ├── process.py             # Main automation logic (ADD YOUR CODE HERE)
 │   ├── initialize.py          # Initialization and setup
 │   ├── finalize.py            # Cleanup and finalization
 │   ├── status_handling.py     # Exception and success handlers
 │   └── logger.py              # Logging configuration
-├── resources/                  # Sample YouTube channel lists to load into the Datapool
+├── resources/                  # Sample YouTube channel lists (input CSV files)
 ├── requirements.txt            # Python dependencies
 ├── .env                        # Environment variables for testing (credentials)
 ├── .gitignore                  # Git ignore file
@@ -93,8 +88,7 @@ BeaPro/
    - Required variables: SERVER, LOGIN, KEY, TASK_ID
 
 4. **Configure your data source**
-   - Edit `framework/datasources.py` (line 120)
-   - Choose between CSVSource, DatapoolSource or add your own data source.
+   - At the bottom of `framework/datasources.py`, set the path of the input CSV in the `CSVSource(...)` line
 
 ## 📝 Usage
 
@@ -163,17 +157,10 @@ Three custom exception types:
 - **`InterruptException`**: Orchestrator interruption requests (stops gracefully)
 
 #### `framework/datasources.py` - Data Sources
-Two ready-to-use data source classes:
-
 **CSVSource**: Reads from CSV files
 - Returns items as dictionaries
 - Generates result CSV with status tracking
 - Automatic timestamp and status columns
-
-**DatapoolSource**: Integrates with BotCity Datapools
-- Fetches items from Orchestrator
-- Automatic status reporting
-- Supports datapool lifecycle
 
 #### `framework/initialize.py` - Initialization
 Sets up the automation environment:
@@ -242,13 +229,6 @@ Your CSV file should have headers in the first row. The framework reads each row
 - Subsequent rows: Data values
 - Access in code: `item['column_name']`
 
-### Datapool Format
-
-When using BotCity Datapools:
-- Configure the datapool in BotCity Orchestrator
-- Set the datapool label in `datasources.py`
-- Items are automatically fetched and status is reported back
-
 ## 🎭 Exception Handling Flow
 
 ```
@@ -315,7 +295,6 @@ All files are automatically uploaded to BotCity Orchestrator as Result Files at 
 ### Items not processing
 - Verify data source configuration in `framework/datasources.py`
 - Check CSV file path and format (must have headers)
-- Ensure datapool is active (for DatapoolSource)
 - Check if data source file exists in resources folder
 
 ### Authentication errors
